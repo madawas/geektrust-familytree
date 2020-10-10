@@ -7,14 +7,20 @@
     <groupId>com.geektrust.familytree</groupId>
     <artifactId>geektrust-familytree</artifactId>
     <version>1.0.0-SNAPSHOT</version>
-    <name>geektrust-familytree</name>
+    <packaging>jar</packaging>
 
     <properties>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <java.version>1.8</java.version>
     </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+            <version>3.9</version>
+        </dependency>
+    </dependencies>
 
     <build>
         <plugins>
