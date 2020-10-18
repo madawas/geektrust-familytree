@@ -143,10 +143,10 @@ public class FamilyMember implements Comparable<FamilyMember> {
      * @return {@code true} if child added successfully
      */
     public boolean addChild(FamilyMember child) {
-        if (Gender.MALE.equals(this.gender)) {
-            return false;
+        if (Gender.FEMALE.equals(this.gender) && this.spouse != null) {
+            return this.children.add(child);
         }
-        return this.children.add(child);
+        return false;
     }
 
     /**
@@ -234,24 +234,40 @@ public class FamilyMember implements Comparable<FamilyMember> {
     }
 
     private List<FamilyMember> getSisterInLaws() {
-        List<FamilyMember> spousesSisters = this.spouse != null ? this.spouse.getSiblings(
-                Gender.FEMALE): new ArrayList<>();
+        List<FamilyMember> spousesSiblings = this.spouse != null ? this.spouse.getSiblings(): new ArrayList<>();
+        // Fetching sisters of spouse
+        List<FamilyMember> spousesSisters = spousesSiblings.stream().filter(
+                member -> Gender.FEMALE.equals(member.getGender())).collect(Collectors.toList());
+        // Assumption: Sister In-Laws include spouses brothers wives
+        List<FamilyMember> spousesBrothersWives = spousesSiblings.stream().filter(
+                member -> Gender.MALE.equals(member.getGender()) && member.getSpouse() != null).map(
+                FamilyMember::getSpouse).collect(Collectors.toList());
+        // Fetching wives of brothers
         List<FamilyMember> wivesOfSiblings = this.getSiblings(Gender.MALE).stream().map(FamilyMember::getSpouse)
                 .collect(Collectors.toList());
         spousesSisters.addAll(wivesOfSiblings);
+        spousesSisters.addAll(spousesBrothersWives);
         // Sorting the relations to maintain the order of insertion
         Collections.sort(spousesSisters);
         return spousesSisters;
     }
 
     private List<FamilyMember> getBrotherInLaws() {
-        List<FamilyMember> spousesSisters = this.spouse != null ? this.spouse.getSiblings(
-                Gender.MALE): new ArrayList<>();
-        List<FamilyMember> wivesOfSiblings = this.getSiblings(Gender.FEMALE).stream().map(FamilyMember::getSpouse)
+        List<FamilyMember> spousesSiblings = this.spouse != null ? this.spouse.getSiblings(): new ArrayList<>();
+        // fetching brothers of spouse
+        List<FamilyMember> spousesBrothers = spousesSiblings.stream().filter(
+                member -> Gender.MALE.equals(member.getGender())).collect(Collectors.toList());
+        // Assumption: Brother In-Laws include spouses sisters husbands
+        List<FamilyMember> spousesSistersHusbands = spousesSiblings.stream().filter(
+                member -> Gender.FEMALE.equals(member.getGender()) && member.getSpouse() != null).map(
+                FamilyMember::getSpouse).collect(Collectors.toList());
+        // Fetching husbands of sisters
+        List<FamilyMember> husbandsOfSiblings = this.getSiblings(Gender.FEMALE).stream().map(FamilyMember::getSpouse)
                 .collect(Collectors.toList());
-        spousesSisters.addAll(wivesOfSiblings);
+        spousesBrothers.addAll(husbandsOfSiblings);
+        spousesBrothers.addAll(spousesSistersHusbands);
         // Sorting the relations to maintain the order of insertion
-        Collections.sort(spousesSisters);
-        return spousesSisters;
+        Collections.sort(spousesBrothers);
+        return spousesBrothers;
     }
 }

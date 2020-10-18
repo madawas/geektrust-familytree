@@ -7,6 +7,8 @@ import com.geektrust.familytree.bean.Relationship;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class CommonUtil {
     private static int familyIndex = 0;
@@ -15,10 +17,19 @@ public class CommonUtil {
 
     }
 
+    /**
+     * Generates a index to the family
+     *
+     * @return Integer index
+     */
     public static int getFamilyIndex() {
         return ++familyIndex;
     }
 
+    /**
+     * Initialize the existing family tree
+     * @return {@link FamilyTree}
+     */
     public static FamilyTree initExistingFamily() {
         FamilyTree familyTree = new FamilyTree("Arthur", Gender.MALE);
         familyTree.addSpouse("Arthur", "Margaret", Gender.FEMALE);
@@ -64,35 +75,37 @@ public class CommonUtil {
         return familyTree;
     }
 
-    public static void processInput(String path, FamilyTree familyTree) throws IOException {
+    /**
+     * Process input file
+     *
+     * @param path path of the input file
+     * @param familyTree {@link FamilyTree} to process the input to
+     * @return List of results after processing the input
+     * @throws IOException if error occurred while reading the file
+     */
+    public static List<String> processInput(String path, FamilyTree familyTree) throws IOException {
+        List<String> resultList = new ArrayList<>();
         try (BufferedReader br = new BufferedReader(new FileReader(path))) {
             String currentLine = br.readLine();
-            while(currentLine != null) {
+            while (currentLine != null) {
                 String[] params = currentLine.split(" ");
                 if (CommonConstants.ADD_CHILD_OPERATION.equals(params[0])) {
-                    CommonUtil.processAddChild(familyTree, params);
+                    if (params.length < 4) {
+                        resultList.add(CommonConstants.INVALID_COMMAND);
+                    } else {
+                        resultList.add(
+                                familyTree.addChild(params[1], params[2], Gender.valueOf(params[3].toUpperCase())));
+                    }
                 } else if (CommonConstants.GET_RELATIONSHIP_OPERATION.equals(params[0])) {
-                    CommonUtil.processGetRelationship(familyTree, params);
+                    if (params.length < 3) {
+                        resultList.add(CommonConstants.INVALID_COMMAND);
+                    } else {
+                        resultList.add(familyTree.getRelationship(params[1], Relationship.get(params[2])));
+                    }
                 }
                 currentLine = br.readLine();
             }
         }
+        return resultList;
     }
-
-    private static void processGetRelationship(FamilyTree familyTree, String[] params) {
-        if (params.length < 3) {
-            System.out.println(CommonConstants.INVALID_COMMAND);
-            return;
-        }
-        System.out.println(familyTree.getRelationship(params[1], Relationship.get(params[2])));
-    }
-
-    private static void processAddChild(FamilyTree familyTree, String[] params) {
-        if (params.length < 4) {
-            System.out.println(CommonConstants.INVALID_COMMAND);
-            return;
-        }
-        System.out.println(familyTree.addChild(params[1], params[2], Gender.valueOf(params[3].toUpperCase())));
-    }
-
 }

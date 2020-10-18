@@ -122,6 +122,16 @@ public class FamilyTree {
     }
 
     /**
+     * Returns the {@link FamilyMember} object of a given family member
+     *
+     * @param name name of the family member to retrieve
+     * @return {@link FamilyMember} of a given name or {@code null} if not exists
+     */
+    public FamilyMember getMember(String name) {
+        return this.getMember(this.root, name);
+    }
+
+    /**
      * Searches for the family member of a given name within the family tree
      *
      * @param root root of the family tree
@@ -162,5 +172,9 @@ public class FamilyTree {
             }
         }
         return member;
+    }
+
+    public FamilyMember getRoot() {
+        return root;
     }
 }
